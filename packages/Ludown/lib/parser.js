@@ -88,11 +88,12 @@ const writeOutFiles = function(program,finalLUISJSON,finalQnAJSON, finalQnAAlter
     if(finalLUISJSON) {
         finalLUISJSON.luis_schema_version = program.luis_schema_version;
         finalLUISJSON.versionId = program.luis_versionId;
-        finalLUISJSON.name = program.luis_name,
+        finalLUISJSON.name = program.luis_name.split('.')[0],
         finalLUISJSON.desc = program.luis_desc;
         finalLUISJSON.culture = program.luis_culture;
-        finalQnAJSON.name = program.qna_name;
     }
+
+    if(finalQnAJSON) finalQnAJSON.name = program.qna_name.split('.')[0];
     
     var writeQnAFile = (finalQnAJSON.qnaList.length > 0) || 
                         (finalQnAJSON.urls.length > 0) || 
@@ -145,7 +146,7 @@ const writeOutFiles = function(program,finalLUISJSON,finalQnAJSON, finalQnAAlter
     if((cmd == cmdEnum.qna) && writeQnAFile) {
         let qnaJson = JSON.stringify(finalQnAJSON, null, 2);
         let qnaFilePath = path.join(outFolder, program.qOutFile);
-        // write out the final LUIS Json
+        // write out the final QnA Json
         try {
             fs.writeFileSync(qnaFilePath, qnaJson, 'utf-8');
         } catch (err) {
@@ -368,7 +369,7 @@ const resolveReferencesInUtterances = async function(allParsedContent) {
             }
         });
         // remove reference utterances from the list. The spliceList needs to be sorted so splice will actually work
-        spliceList.sort((a,b) => b-a).forEach((item, idx) => luisModel.LUISJsonStructure.utterances.splice((item - idx), 1));
+        spliceList.sort((a,b) => a-b).forEach((item, idx) => luisModel.LUISJsonStructure.utterances.splice((item - idx), 1));
         // add new utterances to the list.
         newUtterancesToAdd.forEach(item => luisModel.LUISJsonStructure.utterances.push(item));
     });
